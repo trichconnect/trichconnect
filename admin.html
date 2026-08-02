@@ -17,6 +17,19 @@
     .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 2.5rem; padding: 2.5rem 0; }
     @media (min-width: 900px) { .dashboard-grid { grid-template-columns: 340px 1fr; } }
   </style>
+
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-42QNGWBPYJ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-42QNGWBPYJ');
+</script>
+
+
+
 </head>
 <body class="admin-page">
 
@@ -274,7 +287,7 @@
 
     // IMPORT LIVE INTERNSHIPS FROM ADZUNA (TRICHY TARGETED)
     // IMPORT LIVE INTERNSHIPS FROM ADZUNA (CLEANED FORMATTING)
-    
+
 document.getElementById("import-adzuna-btn")?.addEventListener("click", async () => {
   const statusEl = document.getElementById("import-status");
   const btn = document.getElementById("import-adzuna-btn");
