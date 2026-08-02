@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TRICHCONNECT — HERO DOSSIER</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="manifest" href="manifest.json">
+  <style>
+    .profile-grid { display: grid; grid-template-columns: 1fr; gap: 2.5rem; padding: 2.5rem 0; }
+    @media (min-width: 800px) { .profile-grid { grid-template-columns: 320px 1fr; } }
+    .form-group { margin-bottom: 1.5rem; }
+    .form-group label {
+      display: block;
+      font-family: var(--font-comic);
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      margin-bottom: 0.5rem;
+      color: #FFF;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Comic Action Header -->
+  <header>
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 2rem;">
+        <a href="index.html" class="brand-logo">TRICHCONNECT</a>
+        <nav style="display: flex; gap: 0.8rem;">
+          <a href="index.html" class="nav-pill-btn">your feed</a>
+          <a href="profile.html" class="nav-pill-btn active">profile</a>
+          <a href="admin.html" class="nav-pill-btn nav-admin-btn">admin</a>
+        </nav>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 1.5rem;">
+        <button id="logout-btn" class="nav-pill-btn" style="background: #000; color: #FFF; padding: 0.3rem 0.8rem; font-size: 0.75rem;">EXIT ✕</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="profile-grid">
+
+      <!-- Left Hero Badge Panel -->
+      <aside class="passport-card" style="height: fit-content;">
+        <div style="margin-bottom: 1.5rem;">
+          <span class="comic-tag">IDENTITY VERIFIED</span>
+        </div>
+        
+        <h2 id="card-name" style="font-family: var(--font-hero); font-size: 2.5rem; color: #FFF; line-height: 0.9; margin-bottom: 0.5rem;">LOADING...</h2>
+        <div id="card-college" style="font-family: var(--font-comic); color: #888; font-size: 0.85rem; font-weight: bold; margin-bottom: 1.5rem;">INSTITUTION: UNKNOWN</div>
+
+        <div style="background: #000; border: 2px dashed #FFF; padding: 1rem;">
+          <div style="font-family: var(--font-comic); font-size: 0.75rem; color: #FFF;">TRANSMISSION DOSSIER</div>
+          <div id="card-resume" style="font-family: monospace; font-size: 0.75rem; color: #888; margin-top: 0.5rem;">RESUME: NOT LINKED</div>
+        </div>
+      </aside>
+
+      <!-- Right Edit Form Panel -->
+      <section class="feed-card">
+        <div class="section-title">
+          <span>EDIT HERO DOSSIER</span>
+          <span style="font-size: 1rem; color: #888;">CLASSIFIED DATA</span>
+        </div>
+
+        <form id="profile-form">
+          <div class="form-group">
+            <label for="profile-name">FULL HERO NAME</label>
+            <input type="text" id="profile-name" class="comic-input" required>
+          </div>
+
+          <div class="form-group">
+            <label for="profile-college">AFFILIATED INSTITUTION / COLLEGE</label>
+            <input type="text" id="profile-college" class="comic-input" required>
+          </div>
+
+          <div class="form-group">
+            <label for="profile-skills">SPECIAL POWERS & SKILLS (COMMA SEPARATED)</label>
+            <input type="text" id="profile-skills" class="comic-input" placeholder="e.g. JavaScript, Python, UI Design, Teleportation">
+          </div>
+
+          <div class="form-group">
+            <label for="profile-resume">RESUME CLOUD LINK (DRIVE / DROPBOX / NOTION)</label>
+            <input type="url" id="profile-resume" class="comic-input" placeholder="https://drive.google.com/your-resume-link">
+          </div>
+
+          <button type="submit" class="action-btn" style="margin-top: 1rem;">SAVE DOSSIER DATA →</button>
+        </form>
+
+        <div id="status-msg" style="margin-top: 1.5rem; font-family: var(--font-comic); font-weight: bold; color: #FFF; display: none;"></div>
+      </section>
+
+    </div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZb0b6rFaOTw6stLCCpYzXT43Di9dJ21s",
+      authDomain: "trichconnect.firebaseapp.com",
+      projectId: "trichconnect",
+      storageBucket: "trichconnect.firebasestorage.app",
+      messagingSenderId: "544259822509",
+      appId: "1:544259822509:web:a35a7e11d3da6f900e8724"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUid = null;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        currentUid = user.uid;
+        try {
+          const docSnap = await getDoc(doc(db, "users", currentUid));
+          if (docSnap.exists()) {
+            const data = docSnap.data();
+            document.getElementById("profile-name").value = data.fullName || "";
+            document.getElementById("profile-college").value = data.college || "";
+            document.getElementById("profile-skills").value = data.skills || "";
+            document.getElementById("profile-resume").value = data.resumeUrl || "";
+
+            document.getElementById("card-name").textContent = data.fullName || "Student Hero";
+            document.getElementById("card-college").textContent = "INSTITUTION: " + (data.college || "N/A").toUpperCase();
+            document.getElementById("card-resume").innerHTML = data.resumeUrl 
+              ? `<a href="${data.resumeUrl}" target="_blank" style="color: #FFF; text-decoration: underline;">VIEW TRANSMISSION LINK</a>` 
+              : "RESUME: NOT LINKED";
+          }
+        } catch (err) { console.error(err); }
+      } else {
+        window.location.href = "login.html";
+      }
+    });
+
+    document.getElementById("profile-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const status = document.getElementById("status-msg");
+      status.style.display = "block";
+      status.textContent = "UPDATING DOSSIER...";
+
+      try {
+        await setDoc(doc(db, "users", currentUid), {
+          fullName: document.getElementById("profile-name").value,
+          college: document.getElementById("profile-college").value,
+          skills: document.getElementById("profile-skills").value,
+          resumeUrl: document.getElementById("profile-resume").value,
+          updatedAt: new Date().toISOString()
+        }, { merge: true });
+
+        status.textContent = "✓ DOSSIER UPDATED SUCCESSFULLY";
+        setTimeout(() => location.reload(), 1000);
+      } catch (err) {
+        status.textContent = "ERROR: " + err.message;
+      }
+    });
+
+    document.getElementById("logout-btn").addEventListener("click", () => signOut(auth).then(() => window.location.href = "login.html"));
+  </script>
+</body>
+</html>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TRICHCONNECT // AUTHENTICATION</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+
+  <header>
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+      <a href="login.html" class="brand-logo">TRICHCONNECT</a>
+      <span class="comic-tag">AUTHENTICATION TERMINAL</span>
+    </div>
+  </header>
+
+  <main class="container" style="max-width: 480px; margin: 3rem auto;">
+    
+    <!-- SINGLE UNIFIED AUTH CONTAINER -->
+    <div style="background: #111; border: 3px solid #FFF; padding: 2rem; box-shadow: 6px 6px 0px #FFF;">
+      
+      <!-- MODE TOGGLE BUTTONS -->
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 2px solid #FFF; padding-bottom: 1rem;">
+        <button id="tab-login" class="action-btn" style="background: #FFF; color: #000; padding: 0.5rem; font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; cursor: pointer; border: 1px solid #FFF;">HERO LOGIN</button>
+        <button id="tab-register" class="action-btn" style="background: #000; color: #FFF; padding: 0.5rem; font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; cursor: pointer; border: 1px solid #FFF;">NEW HERO REGISTRATION</button>
+      </div>
+
+      <!-- SINGLE DYNAMIC FORM -->
+      <form id="auth-form">
+        
+        <!-- Registration Fields (Hidden in Login Mode) -->
+        <div id="reg-fields" style="display: none;">
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; font-family: 'Space Grotesk', sans-serif; font-size: 0.8rem; color: #AAA; margin-bottom: 0.3rem;">FULL NAME</label>
+            <input type="text" id="auth-name" style="width: 100%; padding: 0.8rem; background: #000; border: 2px solid #FFF; color: #FFF; font-family: 'Space Grotesk', sans-serif;">
+          </div>
+          
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; font-family: 'Space Grotesk', sans-serif; font-size: 0.8rem; color: #AAA; margin-bottom: 0.3rem;">COLLEGE / GUILD</label>
+            <input type="text" id="auth-college" style="width: 100%; padding: 0.8rem; background: #000; border: 2px solid #FFF; color: #FFF; font-family: 'Space Grotesk', sans-serif;">
+          </div>
+
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; font-family: 'Space Grotesk', sans-serif; font-size: 0.8rem; color: #AAA; margin-bottom: 0.3rem;">MOBILE NUMBER</label>
+            <input type="tel" id="auth-phone" placeholder="+91 9876543210" style="width: 100%; padding: 0.8rem; background: #000; border: 2px solid #FFF; color: #FFF; font-family: 'Space Grotesk', sans-serif;">
+          </div>
+        </div>
+
+        <!-- Shared Credentials -->
+        <div style="margin-bottom: 1rem;">
+          <label style="display: block; font-family: 'Space Grotesk', sans-serif; font-size: 0.8rem; color: #AAA; margin-bottom: 0.3rem;">EMAIL ADDRESS</label>
+          <input type="email" id="auth-email" style="width: 100%; padding: 0.8rem; background: #000; border: 2px solid #FFF; color: #FFF; font-family: 'Space Grotesk', sans-serif;" required>
+        </div>
+
+        <div style="margin-bottom: 1.5rem;">
+          <label style="display: block; font-family: 'Space Grotesk', sans-serif; font-size: 0.8rem; color: #AAA; margin-bottom: 0.3rem;">PASSWORD</label>
+          <input type="password" id="auth-password" style="width: 100%; padding: 0.8rem; background: #000; border: 2px solid #FFF; color: #FFF; font-family: 'Space Grotesk', sans-serif;" required>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" id="submit-btn" class="action-btn" style="width: 100%; padding: 0.8rem; background: #FFF; color: #000; font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; border: none; cursor: pointer;">ACCESS TERMINAL →</button>
+      
+      </form>
+
+    </div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZb0b6rFaOTw6stLCCpYzXT43Di9dJ21s",
+      authDomain: "trichconnect.firebaseapp.com",
+      projectId: "trichconnect",
+      storageBucket: "trichconnect.firebasestorage.app",
+      messagingSenderId: "544259822509",
+      appId: "1:544259822509:web:a35a7e11d3da6f900e8724"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let mode = "login"; // State tracking: "login" or "register"
+
+    const tabLogin = document.getElementById("tab-login");
+    const tabRegister = document.getElementById("tab-register");
+    const regFields = document.getElementById("reg-fields");
+    const submitBtn = document.getElementById("submit-btn");
+
+    // Toggle Modes
+    tabLogin.addEventListener("click", () => switchMode("login"));
+    tabRegister.addEventListener("click", () => switchMode("register"));
+
+    function switchMode(targetMode) {
+      mode = targetMode;
+      if (mode === "login") {
+        tabLogin.style.background = "#FFF"; tabLogin.style.color = "#000";
+        tabRegister.style.background = "#000"; tabRegister.style.color = "#FFF";
+        regFields.style.display = "none";
+        submitBtn.textContent = "ACCESS TERMINAL →";
+        
+        document.getElementById("auth-name").required = false;
+        document.getElementById("auth-college").required = false;
+        document.getElementById("auth-phone").required = false;
+      } else {
+        tabRegister.style.background = "#FFF"; tabRegister.style.color = "#000";
+        tabLogin.style.background = "#000"; tabLogin.style.color = "#FFF";
+        regFields.style.display = "block";
+        submitBtn.textContent = "REGISTER HERO ACCREDITATION →";
+
+        document.getElementById("auth-name").required = true;
+        document.getElementById("auth-college").required = true;
+        document.getElementById("auth-phone").required = true;
+      }
+    }
+
+    // Process Form Submit
+    document.getElementById("auth-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      const email = document.getElementById("auth-email").value;
+      const password = document.getElementById("auth-password").value;
+
+      if (mode === "login") {
+        try {
+          await signInWithEmailAndPassword(auth, email, password);
+          window.location.href = "index.html";
+        } catch (err) {
+          alert("LOGIN ERROR: " + err.message);
+        }
+      } else {
+        const name = document.getElementById("auth-name").value;
+        const college = document.getElementById("auth-college").value;
+        const phone = document.getElementById("auth-phone").value;
+
+        try {
+          const userCred = await createUserWithEmailAndPassword(auth, email, password);
+          const uid = userCred.user.uid;
+
+          // Save user profile with role & phone
+          await setDoc(doc(db, "users", uid), {
+            fullName: name,
+            college: college,
+            phone: phone,
+            email: email,
+            role: "student",
+            createdAt: new Date().toISOString()
+          });
+
+          window.location.href = "index.html";
+        } catch (err) {
+          alert("REGISTRATION ERROR: " + err.message);
+        }
+      }
+    });
+  </script>
+</body>
+</html>

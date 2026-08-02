@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TRICHCONNECT — TERMINAL [ADMIN]</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <style>
+    .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 2.5rem; padding: 2.5rem 0; }
+    @media (min-width: 900px) { .dashboard-grid { grid-template-columns: 340px 1fr; } }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 2rem;">
+        <a href="index.html" class="brand-logo">TRICHCONNECT</a>
+        <nav style="display: flex; gap: 0.8rem;">
+          <a href="index.html" class="nav-pill-btn">YOUR FEED</a>
+          <a href="admin.html" class="nav-pill-btn active">ADMIN TERMINAL</a>
+        </nav>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 1.5rem;">
+        <button id="logout-btn" class="nav-pill-btn" style="background: #000; color: #FFF; padding: 0.3rem 0.8rem; font-size: 0.75rem;">EXIT ✕</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="dashboard-grid">
+
+      <!-- Dispatch Form Left Column -->
+      <aside class="passport-card">
+        <div style="margin-bottom: 1rem;">
+          <span class="comic-tag" style="background: #FFD700; color: #000;">[COMMAND CENTER]</span>
+        </div>
+        
+        <h2 style="font-family: 'Bebas Neue', sans-serif; font-size: 2.5rem; color: #FFF; margin-bottom: 1.5rem;">DISPATCH MISSION</h2>
+
+        <form id="create-mission-form">
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem; color: #AAA; margin-bottom: 0.3rem;">TARGET COMPANY / ORGANIZATION</label>
+            <input type="text" id="mission-company" placeholder="e.g. Stark Industries" style="width: 100%; padding: 0.6rem; background: #000; border: 1px solid #FFF; color: #FFF; font-family: 'Space Grotesk', sans-serif;" required>
+          </div>
+
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem; color: #AAA; margin-bottom: 0.3rem;">MISSION ROLE / TITLE</label>
+            <input type="text" id="mission-role" placeholder="e.g. Frontend Developer Intern" style="width: 100%; padding: 0.6rem; background: #000; border: 1px solid #FFF; color: #FFF; font-family: 'Space Grotesk', sans-serif;" required>
+          </div>
+
+          <div style="margin-bottom: 1rem;">
+            <label style="display: block; font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem; color: #AAA; margin-bottom: 0.3rem;">BOUNTY / STIPEND</label>
+            <input type="text" id="mission-stipend" placeholder="e.g. ₹15,000 / month" style="width: 100%; padding: 0.6rem; background: #000; border: 1px solid #FFF; color: #FFF; font-family: 'Space Grotesk', sans-serif;" required>
+          </div>
+
+          <div style="margin-bottom: 1.5rem;">
+            <label style="display: block; font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem; color: #AAA; margin-bottom: 0.3rem;">MISSION OBJECTIVE & DETAILS</label>
+            <textarea id="mission-desc" rows="4" placeholder="Describe the mission tasks..." style="width: 100%; padding: 0.6rem; background: #000; border: 1px solid #FFF; color: #FFF; font-family: 'Space Grotesk', sans-serif;" required></textarea>
+          </div>
+
+          <button type="submit" class="action-btn" style="width: 100%; padding: 0.8rem; background: #FFF; color: #000; font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; border: none; cursor: pointer;">BROADCAST MISSION ⚡</button>
+        </form>
+      </aside>
+
+      <!-- Submissions Right Column -->
+      <section>
+        <div class="section-title">
+          <span>INCOMING HERO APPLICATIONS</span>
+          <span style="font-size: 1rem; color: #888;">LIVE FEED</span>
+        </div>
+
+        <div id="applications-list">
+          <p style="color: #888; font-family: 'Space Grotesk', sans-serif;">SCANNING SENSOR FEED FOR APPLICATIONS...</p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, collection, getDocs, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZb0b6rFaOTw6stLCCpYzXT43Di9dJ21s",
+      authDomain: "trichconnect.firebaseapp.com",
+      projectId: "trichconnect",
+      storageBucket: "trichconnect.firebasestorage.app",
+      messagingSenderId: "544259822509",
+      appId: "1:544259822509:web:a35a7e11d3da6f900e8724"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    async function loadAllApplications() {
+      const container = document.getElementById("applications-list");
+      try {
+        const snap = await getDocs(collection(db, "applications"));
+        
+        if (snap.empty) {
+          container.innerHTML = `<p style="color: #888; font-family: 'Space Grotesk', sans-serif;">NO DOSSIERS TRANSMITTED YET.</p>`;
+          return;
+        }
+
+        container.innerHTML = "";
+        snap.forEach(docSnap => {
+          const appData = docSnap.data();
+          const appId = docSnap.id;
+          const status = appData.status || "SUBMITTED";
+
+          container.insertAdjacentHTML("beforeend", `
+            <div style="background: #111; border: 2px solid #FFF; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 4px 4px 0px #FFF;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                <span class="comic-tag">[${(appData.company || "UNKNOWN").toUpperCase()}]</span>
+                <span class="comic-tag dark">STATUS: ${status}</span>
+              </div>
+              
+              <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: #FFF; margin-bottom: 0.2rem;">${appData.role}</h3>
+              <p style="color: #AAA; font-size: 0.9rem; font-family: 'Space Grotesk', sans-serif; margin-bottom: 1rem; line-height: 1.5;">
+                <strong>APPLICANT:</strong> ${appData.applicantName}<br>
+                <strong>EMAIL:</strong> ${appData.applicantEmail}<br>
+                <strong>PHONE:</strong> ${appData.applicantPhone || "N/A"}<br>
+                <strong>COLLEGE:</strong> ${appData.applicantCollege}
+              </p>
+
+              <div style="display: flex; gap: 1rem;">
+                <button class="action-btn accept-btn" data-id="${appId}" style="background: #28a745; border-color: #28a745; color: #FFF; padding: 0.4rem 1rem; font-size: 0.9rem;">ACCEPT</button>
+                <button class="action-btn reject-btn" data-id="${appId}" style="background: #dc3545; border-color: #dc3545; color: #FFF; padding: 0.4rem 1rem; font-size: 0.9rem;">REJECT</button>
+              </div>
+            </div>
+          `);
+        });
+
+        document.querySelectorAll(".accept-btn").forEach(btn => {
+          btn.addEventListener("click", () => updateApplicationStatus(btn.dataset.id, "ACCEPTED"));
+        });
+        document.querySelectorAll(".reject-btn").forEach(btn => {
+          btn.addEventListener("click", () => updateApplicationStatus(btn.dataset.id, "REJECTED"));
+        });
+
+      } catch (err) {
+        console.error("Failed to load applications:", err);
+      }
+    }
+
+    async function updateApplicationStatus(appId, newStatus) {
+      try {
+        await updateDoc(doc(db, "applications", appId), { status: newStatus });
+        loadAllApplications();
+      } catch (err) {
+        alert("STATUS UPDATE ERROR: " + err.message);
+      }
+    }
+
+    // STRICT GATEKEEPER CHECK
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        try {
+          const userDocSnap = await getDoc(doc(db, "users", user.uid));
+          if (userDocSnap.exists() && userDocSnap.data().role === "admin") {
+            loadAllApplications();
+          } else {
+            alert("⛔ ACCESS DENIED: Clearance level 'ADMIN' required!");
+            window.location.href = "index.html";
+          }
+        } catch (err) {
+          alert("DATABASE SECURITY ERROR: " + err.message);
+          window.location.href = "index.html";
+        }
+      } else {
+        window.location.href = "login.html";
+      }
+    });
+
+    // POST NEW MISSION
+    document.getElementById("create-mission-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      
+      const company = document.getElementById("mission-company").value;
+      const role = document.getElementById("mission-role").value;
+      const stipend = document.getElementById("mission-stipend").value;
+      const description = document.getElementById("mission-desc").value;
+
+      try {
+        await addDoc(collection(db, "internships"), {
+          company: company,
+          role: role,
+          stipend: stipend,
+          description: description,
+          createdAt: new Date().toISOString()
+        });
+
+        alert("⚡ MISSION BROADCAST SUCCESSFUL!");
+        document.getElementById("create-mission-form").reset();
+      } catch (err) {
+        alert("BROADCAST ERROR: " + err.message);
+      }
+    });
+
+    // LOGOUT
+    document.getElementById("logout-btn").addEventListener("click", () => signOut(auth).then(() => window.location.href = "login.html"));
+  </script>
+</body>
+</html>

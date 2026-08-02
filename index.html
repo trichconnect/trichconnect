@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TRICHCONNECT // STUDENT FEED</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="manifest" href="manifest.json">
+  <style>
+    .dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 2.5rem; padding: 2.5rem 0; }
+    @media (min-width: 900px) { .dashboard-grid { grid-template-columns: 340px 1fr; } }
+  </style>
+</head>
+<body>
+
+  <header>
+    <div class="container" style="display: flex; justify-content: space-between; align-items: center;">
+      <div style="display: flex; align-items: center; gap: 2rem;">
+        <a href="index.html" class="brand-logo">TRICHCONNECT</a>
+        <nav style="display: flex; gap: 0.8rem;">
+          <a href="index.html" class="nav-pill-btn active">YOUR FEED</a>
+          <a href="profile.html" class="nav-pill-btn">PROFILE</a>
+          <a href="admin.html" id="admin-nav-link" class="nav-pill-btn nav-admin-btn" style="display: none;">ADMIN</a>
+        </nav>
+      </div>
+
+      <div style="display: flex; align-items: center; gap: 1.5rem;">
+        <span id="user-email-display" style="font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; color: #888; text-transform: uppercase;">AUTHENTICATING...</span>
+        <button id="logout-btn" class="nav-pill-btn" style="background: #000; color: #FFF; padding: 0.3rem 0.8rem; font-size: 0.75rem;">EXIT ✕</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+    <div class="dashboard-grid">
+
+      <!-- Left Hero Dossier Panel -->
+      <aside class="passport-card">
+        <div style="margin-bottom: 1.5rem;">
+          <span class="comic-tag">HERO DOSSIER</span>
+        </div>
+        
+        <h2 id="student-name" style="font-family: 'Bebas Neue', sans-serif; font-size: 2.8rem; color: #FFF; line-height: 0.9; margin-bottom: 0.5rem; text-transform: uppercase;">LOADING HERO...</h2>
+        <div id="student-college" style="font-family: 'Space Grotesk', sans-serif; color: #888; font-size: 0.85rem; font-weight: bold; margin-bottom: 0.5rem;">INSTITUTION: UNASSIGNED</div>
+        <div id="student-phone" style="font-family: 'Space Grotesk', sans-serif; color: #888; font-size: 0.85rem; font-weight: bold; margin-bottom: 1.5rem;">PHONE: UNASSIGNED</div>
+
+        <div style="background: #000; border: 2px dashed #FFF; padding: 1rem; margin-bottom: 1.5rem;">
+          <div style="font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem; color: #FFF;">CLEARANCE LEVEL: ACTIVE</div>
+          <div id="student-id" style="font-family: monospace; font-size: 0.7rem; color: #888; margin-top: 0.5rem;">UID: FETCHING...</div>
+        </div>
+
+        <a href="profile.html" class="action-btn" style="width: 100%; text-align: center; font-size: 1.1rem; padding: 0.6rem; display: block;">UPDATE DOSSIER →</a>
+      </aside>
+
+      <!-- Right Feed -->
+      <section>
+        <div class="section-title">
+          <span>LOCAL MISSIONS & OPPORTUNITIES</span>
+          <span style="font-size: 1rem; color: #888;">TRICHY SECTOR</span>
+        </div>
+        
+        <div id="opportunities-feed">
+          <div style="background: #111; border: 2px solid #FFF; padding: 2rem; text-align: center; font-family: 'Space Grotesk', sans-serif;">
+            SCANNING DATABASE FOR MISSIONS...
+          </div>
+        </div>
+
+        <div class="section-title" style="margin-top: 3.5rem;">
+          <span>SUBMITTED APPLICATIONS LOG</span>
+        </div>
+        
+        <div id="applications-feed">
+          <p style="color: #888; font-family: 'Space Grotesk', sans-serif;">FETCHING APPLICATION LOGS...</p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+    import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+    import { getFirestore, doc, getDoc, collection, getDocs, addDoc, query, where, orderBy } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+    const firebaseConfig = {
+      apiKey: "AIzaSyAZb0b6rFaOTw6stLCCpYzXT43Di9dJ21s",
+      authDomain: "trichconnect.firebaseapp.com",
+      projectId: "trichconnect",
+      storageBucket: "trichconnect.firebasestorage.app",
+      messagingSenderId: "544259822509",
+      appId: "1:544259822509:web:a35a7e11d3da6f900e8724"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    let currentUserData = null;
+
+    onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        document.getElementById("user-email-display").textContent = user.email;
+        document.getElementById("student-id").textContent = "UID: " + user.uid.substring(0, 10) + "...";
+
+        try {
+          const userSnap = await getDoc(doc(db, "users", user.uid));
+          const adminNavLink = document.getElementById("admin-nav-link");
+
+          if (userSnap.exists()) {
+            currentUserData = userSnap.data();
+            document.getElementById("student-name").textContent = currentUserData.fullName || "HERO USER";
+            if (currentUserData.college) {
+              document.getElementById("student-college").textContent = "INSTITUTION: " + currentUserData.college.toUpperCase();
+            }
+            if (currentUserData.phone) {
+              document.getElementById("student-phone").textContent = "PHONE: " + currentUserData.phone;
+            }
+
+            if (currentUserData.role === "admin") {
+              if (adminNavLink) adminNavLink.style.display = "inline-block";
+            } else {
+              if (adminNavLink) adminNavLink.style.display = "none";
+            }
+          }
+        } catch (err) {
+          console.error("Error fetching dossier:", err);
+        }
+
+        loadOpportunitiesFeed();
+        loadMyApplications(user.uid);
+      } else {
+        window.location.href = "login.html";
+      }
+    });
+
+    async function loadOpportunitiesFeed() {
+      const feed = document.getElementById("opportunities-feed");
+      try {
+        const q = query(collection(db, "internships"), orderBy("createdAt", "desc"));
+        const snap = await getDocs(q);
+        
+        if (snap.empty) {
+          feed.innerHTML = `<p style="color:#888; font-family: 'Space Grotesk', sans-serif;">NO ACTIVE MISSIONS AVAILABLE.</p>`;
+          return;
+        }
+
+        feed.innerHTML = "";
+        snap.forEach(docSnap => {
+          const item = docSnap.data();
+          const listingId = docSnap.id;
+          
+          feed.insertAdjacentHTML("beforeend", `
+            <article class="feed-card" style="background: #111; border: 2px solid #FFF; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 4px 4px 0px #FFF;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                <span class="comic-tag">[${(item.company || "UNKNOWN").toUpperCase()}]</span>
+                <span style="font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; color: #FFF; background: #000; border: 1px solid #FFF; padding: 0.2rem 0.6rem;">STIPEND: ${item.stipend || "N/A"}</span>
+              </div>
+              <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; color: #FFF; margin-bottom: 0.5rem; letter-spacing: 0.05em;">${item.role}</h3>
+              <p style="color: #AAA; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem;">${item.description}</p>
+              <button class="action-btn apply-btn" data-id="${listingId}" data-company="${item.company}" data-role="${item.role}">APPLY FOR MISSION →</button>
+            </article>
+          `);
+        });
+
+        document.querySelectorAll(".apply-btn").forEach(btn => btn.addEventListener("click", handleApply));
+      } catch (err) { 
+        console.error(err); 
+      }
+    }
+
+    async function handleApply(e) {
+      const btn = e.target;
+      btn.disabled = true;
+      btn.innerText = "TRANSMITTING...";
+
+      try {
+        await addDoc(collection(db, "applications"), {
+          listingId: btn.dataset.id,
+          company: btn.dataset.company,
+          role: btn.dataset.role,
+          applicantUid: auth.currentUser.uid,
+          applicantName: currentUserData?.fullName || "Student Hero",
+          applicantEmail: auth.currentUser.email,
+          applicantPhone: currentUserData?.phone || "N/A",
+          applicantCollege: currentUserData?.college || "N/A",
+          status: "SUBMITTED",
+          appliedAt: new Date().toISOString()
+        });
+
+        btn.style.background = "#000000";
+        btn.style.color = "#FFFFFF";
+        btn.style.borderColor = "#FFFFFF";
+        btn.innerText = "✓ APPLICATION TRANSMITTED";
+        
+        loadMyApplications(auth.currentUser.uid);
+      } catch (err) { 
+        alert("ERROR: " + err.message); 
+        btn.disabled = false; 
+        btn.innerText = "APPLY FOR MISSION →";
+      }
+    }
+
+    async function loadMyApplications(uid) {
+      const appFeed = document.getElementById("applications-feed");
+      try {
+        const q = query(collection(db, "applications"), where("applicantUid", "==", uid));
+        const snap = await getDocs(q);
+
+        if (snap.empty) {
+          appFeed.innerHTML = `<p style="color: #666; font-family: 'Space Grotesk', sans-serif;">NO SUBMITTED DOSSIERS ON FILE.</p>`;
+          return;
+        }
+
+        appFeed.innerHTML = "";
+        snap.forEach(docSnap => {
+          const appData = docSnap.data();
+          appFeed.insertAdjacentHTML("beforeend", `
+            <div style="background: #111; border: 2px solid #FFF; padding: 1.25rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 4px 4px 0px #FFF;">
+              <div>
+                <div style="font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: #FFF;">${appData.role}</div>
+                <div style="font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; color: #888;">TARGET: ${appData.company.toUpperCase()}</div>
+              </div>
+              <span class="comic-tag dark">STATUS: ${appData.status}</span>
+            </div>
+          `);
+        });
+      } catch (err) { 
+        console.error(err); 
+      }
+    }
+
+    document.getElementById("logout-btn").addEventListener("click", () => signOut(auth).then(() => window.location.href = "login.html"));
+  </script>
+</body>
+</html>

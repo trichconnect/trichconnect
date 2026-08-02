@@ -1,0 +1,202 @@
+/* ==========================================================================
+   TRICHCONNECT DESIGN SYSTEM — MARVEL COMICS NOIR EDITION (B&W)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@500;700&family=Inter:wght@400;600;800&display=swap');
+
+/* --- Marvel Noir Tokens --- */
+:root {
+  --bg-main: #000000;
+  --bg-panel: #090909;
+  --bg-card: #111111;
+  --border-comic: 3px solid #FFFFFF;
+  --border-thin: 1px solid #333333;
+  
+  --text-primary: #FFFFFF;
+  --text-muted: #888888;
+  
+  --font-hero: 'Bebas Neue', sans-serif;
+  --font-comic: 'Space Grotesk', sans-serif;
+  --font-body: 'Inter', sans-serif;
+  
+  --shadow-comic: 6px 6px 0px #FFFFFF;
+  --shadow-hover: 10px 10px 0px #FFFFFF;
+}
+
+/* --- Base Reset & Halftone Canvas --- */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  background-color: var(--bg-main) !important;
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  /* Subtle Comic Halftone Dot Pattern */
+  background-image: radial-gradient(rgba(255, 255, 255, 0.12) 1px, transparent 0);
+  background-size: 16px 16px;
+  background-attachment: fixed;
+}
+
+/* --- Navigation Header --- */
+header {
+  background: #000000;
+  border-bottom: 4px solid #FFFFFF;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  padding: 1.2rem 0;
+}
+
+.brand-logo {
+  font-family: var(--font-hero);
+  font-size: 2.8rem;
+  letter-spacing: 0.05em;
+  color: #FFFFFF;
+  text-decoration: none;
+  text-transform: uppercase;
+  text-shadow: 3px 3px 0px #333333;
+}
+
+.nav-pill-btn {
+  color: #FFFFFF;
+  text-decoration: none;
+  font-family: var(--font-comic);
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.5rem 1.2rem;
+  border: 2px solid #FFFFFF;
+  background: #000000;
+  text-transform: uppercase;
+  box-shadow: 3px 3px 0px #FFFFFF;
+  transition: all 0.15s ease;
+}
+
+.nav-pill-btn:hover, .nav-pill-btn.active {
+  background: #FFFFFF;
+  color: #000000;
+  box-shadow: 5px 5px 0px #888888;
+}
+
+.nav-admin-btn {
+  background: #FFFFFF;
+  color: #000000;
+}
+
+/* --- Container & Layout --- */
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+/* --- Comic Book Panels --- */
+.feed-card, .passport-card {
+  background: var(--bg-card);
+  border: var(--border-comic);
+  padding: 2rem;
+  box-shadow: var(--shadow-comic);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+  margin-bottom: 2rem;
+}
+
+.feed-card:hover {
+  transform: translate(-4px, -4px);
+  box-shadow: var(--shadow-hover);
+}
+
+/* --- Speech Bubble & Chapter Tags --- */
+.comic-tag {
+  display: inline-block;
+  background: #FFFFFF;
+  color: #000000;
+  font-family: var(--font-hero);
+  font-size: 1rem;
+  letter-spacing: 0.05em;
+  padding: 0.2rem 0.8rem;
+  border: 2px solid #000000;
+  box-shadow: 3px 3px 0px #666666;
+  text-transform: uppercase;
+}
+
+.comic-tag.dark {
+  background: #000000;
+  color: #FFFFFF;
+  border-color: #FFFFFF;
+  box-shadow: 3px 3px 0px #FFFFFF;
+}
+
+/* --- Marvel Action Buttons --- */
+.action-btn, .btn-editorial {
+  display: inline-block;
+  background: #FFFFFF;
+  color: #000000;
+  font-family: var(--font-hero);
+  font-size: 1.3rem;
+  letter-spacing: 0.08em;
+  padding: 0.8rem 2rem;
+  border: 3px solid #000000;
+  cursor: pointer;
+  text-decoration: none;
+  text-transform: uppercase;
+  box-shadow: 4px 4px 0px #888888;
+  transition: all 0.15s ease;
+}
+
+.action-btn:hover, .btn-editorial:hover {
+  background: #000000;
+  color: #FFFFFF;
+  border-color: #FFFFFF;
+  box-shadow: 6px 6px 0px #FFFFFF;
+}
+
+.action-btn:disabled {
+  background: #333333;
+  color: #888888;
+  border-color: #555555;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
+/* --- Section Headers --- */
+.section-title {
+  font-family: var(--font-hero);
+  font-size: 2.2rem;
+  letter-spacing: 0.05em;
+  color: #FFFFFF;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 3px solid #FFFFFF;
+  padding-bottom: 0.5rem;
+  margin-bottom: 2rem;
+}
+
+/* --- Input Fields --- */
+.comic-input, .comic-select, .comic-textarea {
+  width: 100%;
+  background-color: #000000;
+  border: 2px solid #FFFFFF;
+  color: #FFFFFF;
+  padding: 1rem 1.2rem;
+  font-family: var(--font-comic);
+  font-size: 1rem;
+  outline: none;
+  box-shadow: 4px 4px 0px #333333;
+}
+
+.comic-input:focus, .comic-select:focus, .comic-textarea:focus {
+  background-color: #111111;
+  box-shadow: 5px 5px 0px #FFFFFF;
+}
+
+/* --- Custom Scrollbar --- */
+::-webkit-scrollbar { width: 10px; }
+::-webkit-scrollbar-track { background: #000000; }
+::-webkit-scrollbar-thumb { background: #FFFFFF; border: 2px solid #000000; }
