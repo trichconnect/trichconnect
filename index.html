@@ -33,7 +33,7 @@
 
       <div style="display: flex; align-items: center; gap: 1.5rem;">
         <span id="user-email-display" style="font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; color: #888; text-transform: uppercase;">AUTHENTICATING...</span>
-        <button id="logout-btn" class="nav-pill-btn" style="background: #000; color: #FFF; padding: 0.3rem 0.8rem; font-size: 0.75rem;">EXIT ✕</button>
+        <button id="logout-btn" class="nav-pill-btn" style="background: #000; color: #FFF; padding: 0.3rem 0.8rem; font-size: 0.75rem; cursor: pointer;">EXIT ✕</button>
       </div>
     </div>
   </header>
@@ -56,7 +56,7 @@
           <div id="student-id" style="font-family: monospace; font-size: 0.7rem; color: #888; margin-top: 0.5rem;">UID: FETCHING...</div>
         </div>
 
-        <a href="profile.html" class="action-btn" style="width: 100%; text-align: center; font-size: 1.1rem; padding: 0.6rem; display: block;">UPDATE DOSSIER →</a>
+        <a href="profile.html" class="action-btn" style="width: 100%; text-align: center; font-size: 1.1rem; padding: 0.6rem; display: block; text-decoration: none;">UPDATE DOSSIER →</a>
       </aside>
 
       <!-- Right Feed -->
@@ -70,7 +70,7 @@
         </div>
         
         <div id="opportunities-feed" class="job-feed-grid">
-          <div style="background: #111; border: 2px solid #FFF; padding: 2rem; text-align: center; font-family: 'Space Grotesk', sans-serif;">
+          <div style="background: #111; border: 2px solid #FFF; padding: 2rem; text-align: center; font-family: 'Space Grotesk', sans-serif; color: #888;">
             SCANNING DATABASE FOR MISSIONS...
           </div>
         </div>
@@ -162,37 +162,63 @@
           const item = docSnap.data();
           const listingId = docSnap.id;
           
-          feed.insertAdjacentHTML("beforeend", `
-            <div class="mission-card">
-              <div class="mission-card-header">
-                <div class="company-badge">
-                  <span class="company-name">${(item.company || "UNKNOWN").toUpperCase()}</span>
-                  <span class="mission-type">MISSION</span>
-                </div>
-                <div class="stipend-badge">
-                  <span class="stipend-amount">₹${item.stipend || "N/A"}</span>
-                  <span class="stipend-sub">/ month</span>
-                </div>
+          // Determine if listing came from external Adzuna API (Option B) or Direct Submission (Option A)
+          const isExternal = Boolean(item.applyUrl && item.applyUrl.startsWith("http"));
+          
+          // Format stipend text cleanly
+          let cleanStipend = item.stipend || "Disclosed Upon Selection";
+          cleanStipend = cleanStipend.replace(/^₹+/, "").replace(/\/ month|\/mo/g, "").trim();
+          const displayStipend = cleanStipend.includes("Disclosed") ? cleanStipend : `₹${cleanStipend} / month`;
+
+          const cardHTML = `
+            <div style="background: #0d0d0d; border: 2px solid ${isExternal ? '#00f2fe' : '#FFD700'}; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 4px 4px 0px ${isExternal ? '#00f2fe' : '#FFD700'}; border-radius: 4px;">
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.8rem;">
+                <span class="comic-tag" style="background: ${isExternal ? '#00f2fe' : '#FFD700'}; color: #000; font-weight: bold;">
+                  [${(item.company || "VERIFIED PARTNER").toUpperCase()}]
+                </span>
+                <span style="font-family: 'Space Grotesk', sans-serif; font-size: 0.75rem; color: #FFF; background: #222; padding: 0.2rem 0.6rem; border-radius: 3px;">
+                  ${isExternal ? "🌐 AGGREGATED MISSION" : "⚡ EXCLUSIVE TRICHY DIRECT"}
+                </span>
               </div>
 
-              <div class="mission-body">
-                <h4 class="mission-title">${item.role}</h4>
-                <p class="mission-location">📍 Trichy Sector</p>
-                <p class="mission-desc">${item.description || "No mission protocol details provided."}</p>
+              <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: #FFF; margin: 0.3rem 0; letter-spacing: 0.05em;">
+                ${item.role}
+              </h3>
+
+              <div style="font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; color: #888; margin-bottom: 0.5rem;">
+                📍 Trichy Sector / Remote
               </div>
 
-              <div class="mission-footer">
-                <button class="action-btn apply-btn" data-id="${listingId}" data-company="${item.company}" data-role="${item.role}">
-                  APPLY FOR MISSION →
-                </button>
+              <div style="font-family: 'Space Grotesk', sans-serif; font-size: 0.95rem; color: #34d399; font-weight: bold; margin-bottom: 0.8rem;">
+                💰 ${displayStipend}
+              </div>
+
+              <p style="color: #AAA; font-size: 0.88rem; font-family: 'Space Grotesk', sans-serif; line-height: 1.5; margin-bottom: 1.2rem;">
+                ${item.description || "No mission protocol details provided."}
+              </p>
+
+              <div>
+                ${isExternal ? `
+                  <!-- OPTION B: External API Direct Link -->
+                  <a href="${item.applyUrl}" target="_blank" rel="noopener noreferrer" class="action-btn" style="display: block; text-align: center; background: #00f2fe; color: #000; padding: 0.7rem; font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; text-decoration: none; font-weight: bold; border: none;">
+                    APPLY ON OFFICIAL SITE ↗
+                  </a>
+                ` : `
+                  <!-- OPTION A: Internal Application modal for direct TrichConnect postings -->
+                  <button class="action-btn apply-btn" data-id="${listingId}" data-company="${item.company}" data-role="${item.role}" style="width: 100%; background: #FFD700; color: #000; padding: 0.7rem; font-family: 'Bebas Neue', sans-serif; font-size: 1.2rem; border: none; cursor: pointer; font-weight: bold;">
+                    APPLY VIA TRICHCONNECT →
+                  </button>
+                `}
               </div>
             </div>
-          `);
+          `;
+
+          feed.insertAdjacentHTML("beforeend", cardHTML);
         });
 
         document.querySelectorAll(".apply-btn").forEach(btn => btn.addEventListener("click", handleApply));
       } catch (err) { 
-        console.error(err); 
+        console.error("Error loading feed:", err); 
       }
     }
 
@@ -224,7 +250,7 @@
       } catch (err) { 
         alert("ERROR: " + err.message); 
         btn.disabled = false; 
-        btn.innerText = "APPLY FOR MISSION →";
+        btn.innerText = "APPLY VIA TRICHCONNECT →";
       }
     }
 
@@ -246,14 +272,14 @@
             <div style="background: #111; border: 2px solid #FFF; padding: 1.25rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 4px 4px 0px #FFF;">
               <div>
                 <div style="font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: #FFF; letter-spacing: 0.05em;">${appData.role}</div>
-                <div style="font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; color: #888;">TARGET: ${appData.company.toUpperCase()}</div>
+                <div style="font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; color: #888;">TARGET: ${(appData.company || "UNKNOWN").toUpperCase()}</div>
               </div>
               <span class="comic-tag dark">STATUS: ${appData.status}</span>
             </div>
           `);
         });
       } catch (err) { 
-        console.error(err); 
+        console.error("Error loading application logs:", err); 
       }
     }
 
