@@ -1,3 +1,19 @@
+/* ===================================================
+   CSS VARIABLES & THEME CONFIGURATION
+   =================================================== */
+:root {
+  --bg-color: #0d1117;          /* Dark Slate Background */
+  --card-bg: #161b22;          /* Slightly Lighter Card Background */
+  --header-bg: #161b22;        /* Header Background */
+  --border-color: #30363d;     /* Clean Subtle Borders */
+  
+  --primary-accent: #00f2fe;   /* Electric Neon Cyan */
+  --secondary-accent: #4facfe; /* Deep Sky Blue */
+  
+  --text-main: #f0f6fc;        /* Bright White Text */
+  --text-muted: #8b949e;       /* Muted Gray Text */
+  --input-bg: #0d1117;         /* Dark Input Fields */
+}
 
 /* Base Reset & Variables */
 * {
@@ -7,8 +23,8 @@
 }
 
 body {
-  background-color: #000000;
-  color: #FFFFFF;
+  background-color: var(--bg-color);
+  color: var(--text-main);
   font-family: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
   line-height: 1.5;
   padding: 0;
@@ -26,9 +42,9 @@ body {
 
 /* Header & Nav */
 header {
-  border-bottom: 2px solid #FFFFFF;
+  border-bottom: 2px solid var(--border-color);
   padding: 1rem 0;
-  background: #000000;
+  background: var(--header-bg);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -38,17 +54,18 @@ header {
   font-family: 'Bebas Neue', sans-serif;
   font-size: 2rem;
   letter-spacing: 0.1em;
-  color: #FFFFFF;
+  color: var(--primary-accent);
   text-decoration: none;
+  text-shadow: 0 0 10px rgba(0, 242, 254, 0.3);
 }
 
 .nav-pill-btn {
   font-family: 'Space Grotesk', sans-serif;
   font-size: 0.75rem;
   font-weight: 700;
-  color: #888888;
+  color: var(--text-muted);
   background: transparent;
-  border: 1px solid #333333;
+  border: 1px solid var(--border-color);
   padding: 0.4rem 0.8rem;
   text-decoration: none;
   cursor: pointer;
@@ -58,8 +75,9 @@ header {
 
 .nav-pill-btn.active, .nav-pill-btn:hover {
   color: #000000;
-  background: #FFFFFF;
-  border-color: #FFFFFF;
+  background: var(--primary-accent);
+  border-color: var(--primary-accent);
+  box-shadow: 0 0 8px rgba(0, 242, 254, 0.4);
 }
 
 /* Layout Grid */
@@ -80,11 +98,12 @@ header {
 
 /* Cards & Comic Style Containers */
 .passport-card, .feed-card {
-  background: #111111;
-  border: 2px solid #FFFFFF;
+  background: var(--card-bg);
+  border: 2px solid var(--border-color);
   padding: 1.25rem;
-  box-shadow: 4px 4px 0px #FFFFFF;
+  box-shadow: 4px 4px 0px var(--primary-accent);
   word-break: break-word; /* Prevents long text/emails from stretching screen */
+  transition: box-shadow 0.2s ease;
 }
 
 /* Buttons */
@@ -93,14 +112,20 @@ header {
   font-size: 1.1rem;
   letter-spacing: 0.05em;
   padding: 0.75rem 1rem;
-  background: #FFFFFF;
+  background: var(--primary-accent);
   color: #000000;
-  border: 2px solid #FFFFFF;
+  border: 2px solid var(--primary-accent);
   cursor: pointer;
   width: 100%;
   display: inline-block;
   text-align: center;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
+  font-weight: bold;
+}
+
+.action-btn:hover {
+  background: var(--secondary-accent);
+  border-color: var(--secondary-accent);
 }
 
 .action-btn:active {
@@ -113,25 +138,25 @@ header {
   font-size: 0.7rem;
   font-weight: 700;
   padding: 0.2rem 0.5rem;
-  background: #FFFFFF;
+  background: var(--primary-accent);
   color: #000000;
   text-transform: uppercase;
   display: inline-block;
 }
 
 .comic-tag.dark {
-  background: #222222;
-  color: #FFFFFF;
-  border: 1px solid #FFFFFF;
+  background: var(--input-bg);
+  color: var(--text-main);
+  border: 1px solid var(--border-color);
 }
 
 /* Forms & Inputs */
 input, textarea {
   width: 100%;
   padding: 0.8rem;
-  background: #000000;
-  border: 2px solid #FFFFFF;
-  color: #FFFFFF;
+  background: var(--input-bg);
+  border: 2px solid var(--border-color);
+  color: var(--text-main);
   font-family: 'Space Grotesk', sans-serif;
   font-size: 0.95rem;
   border-radius: 0; /* Prevents iOS default rounded input fields */
@@ -139,7 +164,8 @@ input, textarea {
 
 input:focus, textarea:focus {
   outline: none;
-  background: #0a0a0a;
+  border-color: var(--primary-accent);
+  background: #121820;
 }
 
 /* Mobile Responsiveness Rules (< 600px) */
@@ -171,6 +197,30 @@ input:focus, textarea:focus {
 
   .passport-card, .feed-card {
     padding: 1rem;
-    box-shadow: 3px 3px 0px #FFFFFF;
+    box-shadow: 3px 3px 0px var(--primary-accent);
   }
+}
+
+/* ===================================================
+   PROTECTION OVERRIDE FOR LOGIN, ADMIN, AND PROFILE PAGES
+   (Retains Original Black & White Theme for these pages)
+   =================================================== */
+body.login-page, 
+body.admin-page, 
+body.profile-page {
+  --bg-color: #000000;
+  --card-bg: #111111;
+  --header-bg: #000000;
+  --border-color: #FFFFFF;
+  --primary-accent: #FFFFFF;
+  --secondary-accent: #CCCCCC;
+  --text-main: #FFFFFF;
+  --text-muted: #888888;
+  --input-bg: #000000;
+}
+
+body.login-page .brand-logo,
+body.admin-page .brand-logo,
+body.profile-page .brand-logo {
+  text-shadow: none;
 }
