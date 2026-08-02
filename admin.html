@@ -273,51 +273,58 @@
     });
 
     // IMPORT LIVE INTERNSHIPS FROM ADZUNA (TRICHY TARGETED)
-    document.getElementById("import-adzuna-btn")?.addEventListener("click", async () => {
-      const statusEl = document.getElementById("import-status");
-      const btn = document.getElementById("import-adzuna-btn");
+    // IMPORT LIVE INTERNSHIPS FROM ADZUNA (CLEANED FORMATTING)
+    
+document.getElementById("import-adzuna-btn")?.addEventListener("click", async () => {
+  const statusEl = document.getElementById("import-status");
+  const btn = document.getElementById("import-adzuna-btn");
 
-      statusEl.style.color = "#00f2fe";
-      statusEl.innerText = "⏳ Scanning Adzuna for Trichy opportunities...";
-      btn.disabled = true;
+  statusEl.style.color = "#00f2fe";
+  statusEl.innerText = "⏳ Scanning Adzuna for Trichy opportunities...";
+  btn.disabled = true;
 
-      // Fetches remote internships in India
-const apiUrl = `https://api.adzuna.com/v1/api/jobs/in/search/1?app_id=${ADZUNA_APP_ID}&app_key=${ADZUNA_APP_KEY}&results_per_page=10&what=internship remote`;
+  const apiUrl = `https://api.adzuna.com/v1/api/jobs/in/search/1?app_id=${ADZUNA_APP_ID}&app_key=${ADZUNA_APP_KEY}&results_per_page=10&what=internship&where=Trichy`;
 
-      try {
-        const response = await fetch(apiUrl);
-        const data = await response.json();
+  try {
+    const response = await fetch(apiUrl);
+    const data = await response.json();
 
-        if (!data.results || data.results.length === 0) {
-          statusEl.style.color = "#ff4b4b";
-          statusEl.innerText = "⚠️ No direct Trichy listings found today on Adzuna. Try searching broader areas or remote roles!";
-          btn.disabled = false;
-          return;
-        }
+    if (!data.results || data.results.length === 0) {
+      statusEl.style.color = "#ff4b4b";
+      statusEl.innerText = "⚠️ No direct Trichy listings found today on Adzuna. Try searching broader areas or remote roles!";
+      btn.disabled = false;
+      return;
+    }
 
-        let addedCount = 0;
-        for (const job of data.results) {
-          await addDoc(collection(db, "internships"), {
-            company: job.company?.display_name || "Verified Partner",
-            role: job.title.replace(/<\/?[^>]+(>|$)/g, ""),
-            stipend: job.salary_min ? `₹${Math.round(job.salary_min / 12)} / month` : "Stipend Disclosed Upon Selection",
-            description: job.description ? job.description.substring(0, 180) + "..." : "No detailed objective provided.",
-            applyUrl: job.redirect_url,
-            createdAt: new Date().toISOString()
-          });
-          addedCount++;
-        }
-
-        statusEl.style.color = "#34d399";
-        statusEl.innerText = `✅ SUCCESS! Added ${addedCount} Trichy missions directly to Firestore!`;
-      } catch (err) {
-        console.error("Adzuna API Fetch Error:", err);
-        statusEl.style.color = "#ff4b4b";
-        statusEl.innerText = "❌ FETCH ERROR: " + err.message;
-      } finally {
-        btn.disabled = false;
+    let addedCount = 0;
+    for (const job of data.results) {
+      // Clean up stipend formatting (No double ₹ or repeated '/ month')
+      let stipendText = "Disclosed Upon Selection";
+      if (job.salary_min) {
+        stipendText = `₹${Math.round(job.salary_min / 12)} / month`;
       }
-    });
+
+      await addDoc(collection(db, "internships"), {
+        company: job.company?.display_name || "Verified Partner",
+        role: job.title.replace(/<\/?[^>]+(>|$)/g, ""), // Strip HTML tags
+        stipend: stipendText,
+        description: job.description ? job.description.substring(0, 160) + "..." : "No detailed objective provided.",
+        applyUrl: job.redirect_url || "",
+        createdAt: new Date().toISOString()
+      });
+      addedCount++;
+    }
+
+    statusEl.style.color = "#34d399";
+    statusEl.innerText = `✅ SUCCESS! Added ${addedCount} clean missions directly to Firestore!`;
+  } catch (err) {
+    console.error("Adzuna API Fetch Error:", err);
+    statusEl.style.color = "#ff4b4b";
+    statusEl.innerText = "❌ FETCH ERROR: " + err.message;
+  } finally {
+    btn.disabled = false;
+  }
+});
 
     // LOGOUT
     document.getElementById("logout-btn").addEventListener("click", () => signOut(auth).then(() => window.location.href = "login.html"));
