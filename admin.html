@@ -18,33 +18,17 @@
     @media (min-width: 900px) { .dashboard-grid { grid-template-columns: 340px 1fr; } }
   </style>
 
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-42QNGWBPYJ"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-42QNGWBPYJ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
 
-  gtag('config', 'G-42QNGWBPYJ');
-</script>
-
-<!-- Registered Users Section -->
-<section style="margin-top: 3rem; background: #000; border: 2px solid #00f2fe; padding: 1.5rem; border-radius: 8px;">
-  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
-    <h2 style="color: #00f2fe; font-family: 'Space Grotesk', sans-serif; margin: 0;">
-      👥 REGISTERED HEROES (<span id="total-users-count">0</span>)
-    </h2>
-    <button id="refresh-users-btn" onclick="loadAllUsers()" style="background: #00f2fe; color: #000; border: none; padding: 0.5rem 1rem; font-weight: bold; cursor: pointer; border-radius: 4px;">
-      🔄 REFRESH USERS
-    </button>
-  </div>
-
-  <div id="users-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
-    <p style="color: #666;">Loading users...</p>
-  </div>
-</section>
-
+    gtag('config', 'G-42QNGWBPYJ');
+  </script>
 </head>
+
 <body class="admin-page">
 
   <header>
@@ -58,7 +42,7 @@
       </div>
 
       <div style="display: flex; align-items: center; gap: 1.5rem;">
-        <button id="logout-btn" class="nav-pill-btn" style="background: #000; color: #FFF; padding: 0.3rem 0.8rem; font-size: 0.75rem;">EXIT ✕</button>
+        <button id="logout-btn" class="nav-pill-btn" style="background: #000; color: #FFF; padding: 0.3rem 0.8rem; font-size: 0.75rem; cursor: pointer;">EXIT ✕</button>
       </div>
     </div>
   </header>
@@ -113,8 +97,10 @@
         </div>
       </aside>
 
-      <!-- Submissions Right Column -->
+      <!-- Right Column: Submissions & Registered Heroes -->
       <section>
+        
+        <!-- INCOMING APPLICATIONS -->
         <div class="section-title">
           <span>INCOMING HERO APPLICATIONS</span>
         </div>
@@ -127,74 +113,30 @@
         <div id="applications-list">
           <p style="color: #888; font-family: 'Space Grotesk', sans-serif;">SCANNING SENSOR FEED FOR APPLICATIONS...</p>
         </div>
+
+        <!-- REGISTERED HEROES / USERS SECTION -->
+        <section style="margin-top: 3rem; background: #000; border: 2px solid #00f2fe; padding: 1.5rem; border-radius: 8px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 0.5rem;">
+            <h2 style="color: #00f2fe; font-family: 'Space Grotesk', sans-serif; margin: 0; font-size: 1.2rem;">
+              👥 REGISTERED HEROES (<span id="total-users-count">0</span>)
+            </h2>
+            <button id="refresh-users-btn" style="background: #00f2fe; color: #000; border: none; padding: 0.5rem 1rem; font-weight: bold; cursor: pointer; border-radius: 4px; font-family: 'Space Grotesk', sans-serif;">
+              🔄 REFRESH USERS
+            </button>
+          </div>
+
+          <div id="users-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 1rem;">
+            <p style="color: #888; font-family: 'Space Grotesk', sans-serif;">AUTHENTICATING & LOADING USERS...</p>
+          </div>
+        </section>
+
       </section>
 
     </div>
   </main>
 
-  <!-- FIREBASE & APPLICATION LOGIC -->
+  <!-- SINGLE CONSOLIDATED FIREBASE SCRIPT -->
   <script type="module">
-
-
-import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-
-// Call this function when the admin page loads (or after verifying admin auth)
-async function loadAllUsers() {
-  const grid = document.getElementById("users-grid");
-  const countSpan = document.getElementById("total-users-count");
-
-  try {
-    const usersSnap = await getDocs(collection(db, "users"));
-    
-    if (usersSnap.empty) {
-      grid.innerHTML = `<p style="color: #aaa;">No users registered yet.</p>`;
-      countSpan.textContent = "0";
-      return;
-    }
-
-    countSpan.textContent = usersSnap.size;
-    grid.innerHTML = "";
-
-    usersSnap.forEach((docSnap) => {
-      const u = docSnap.data();
-      const uid = docSnap.id;
-
-      grid.insertAdjacentHTML("beforeend", `
-        <div style="background: #111; border: 1px solid #333; padding: 1rem; border-radius: 6px; display: flex; flex-direction: column; justify-content: space-between;">
-          <div>
-            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
-              <h4 style="color: #FFF; margin: 0; font-size: 1.1rem;">${u.fullName || 'Anonymous Hero'}</h4>
-              <span style="background: #222; color: #FFD700; font-size: 0.75rem; padding: 2px 6px; border-radius: 3px; font-weight: bold; text-transform: uppercase;">
-                ${u.role || 'student'}
-              </span>
-            </div>
-            
-            <p style="color: #00f2fe; font-size: 0.85rem; margin: 0.2rem 0;">🎓 ${u.college || 'College Not Set'}</p>
-            <p style="color: #aaa; font-size: 0.85rem; margin: 0.2rem 0;">✉️ ${u.email || 'N/A'}</p>
-            <p style="color: #aaa; font-size: 0.85rem; margin: 0.2rem 0;">📞 ${u.phone || 'N/A'}</p>
-          </div>
-
-          <div style="margin-top: 1rem; padding-top: 0.5rem; border-top: 1px solid #222; font-size: 0.7rem; color: #555;">
-            UID: ${uid.substring(0, 10)}...
-          </div>
-        </div>
-      `);
-    });
-
-  } catch (error) {
-    console.error("Error loading users:", error);
-    grid.innerHTML = `<p style="color: #ff4d4d;">Failed to load users: ${error.message}</p>`;
-  }
-}
-
-// Make function accessible globally for the Refresh button
-window.loadAllUsers = loadAllUsers;
-
-// Trigger load on start
-loadAllUsers();
-
-
-
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, getDoc, collection, getDocs, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
@@ -216,45 +158,60 @@ loadAllUsers();
     const ADZUNA_APP_ID = "6eab10ad";
     const ADZUNA_APP_KEY = "bfbf19027e4f41972c245d5734d10c92";
 
-    // EXPORT APPLICATIONS TO CSV
-    document.getElementById("export-csv-btn").addEventListener("click", async () => {
+    // 1. FETCH & RENDER ALL REGISTERED USERS
+    async function loadAllUsers() {
+      const grid = document.getElementById("users-grid");
+      const countSpan = document.getElementById("total-users-count");
+
       try {
-        const snap = await getDocs(collection(db, "applications"));
-        if (snap.empty) {
-          alert("No application records found to export.");
+        grid.innerHTML = `<p style="color: #00f2fe; font-family: 'Space Grotesk', sans-serif;">🔄 Fetching users from Firestore...</p>`;
+        const usersSnap = await getDocs(collection(db, "users"));
+        
+        if (usersSnap.empty) {
+          grid.innerHTML = `<p style="color: #aaa; font-family: 'Space Grotesk', sans-serif;">No registered users found.</p>`;
+          if (countSpan) countSpan.textContent = "0";
           return;
         }
 
-        let csvContent = "data:text/csv;charset=utf-8,Applicant Name,Email,Phone,College,Company,Role,Status,Applied At\n";
+        if (countSpan) countSpan.textContent = usersSnap.size;
+        grid.innerHTML = "";
 
-        snap.forEach(docSnap => {
-          const data = docSnap.data();
-          const row = [
-            `"${data.applicantName || ""}"`,
-            `"${data.applicantEmail || ""}"`,
-            `"${data.applicantPhone || ""}"`,
-            `"${data.applicantCollege || ""}"`,
-            `"${data.company || ""}"`,
-            `"${data.role || ""}"`,
-            `"${data.status || ""}"`,
-            `"${data.appliedAt || ""}"`
-          ].join(",");
-          csvContent += row + "\n";
+        usersSnap.forEach((docSnap) => {
+          const u = docSnap.data();
+          const uid = docSnap.id;
+
+          grid.insertAdjacentHTML("beforeend", `
+            <div style="background: #111; border: 1px solid #333; padding: 1rem; border-radius: 6px; display: flex; flex-direction: column; justify-content: space-between; font-family: 'Space Grotesk', sans-serif;">
+              <div>
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+                  <h4 style="color: #FFF; margin: 0; font-size: 1rem;">${u.fullName || 'Anonymous Hero'}</h4>
+                  <span style="background: #222; color: #FFD700; font-size: 0.7rem; padding: 2px 6px; border-radius: 3px; font-weight: bold; text-transform: uppercase;">
+                    ${u.role || 'student'}
+                  </span>
+                </div>
+                
+                <p style="color: #00f2fe; font-size: 0.8rem; margin: 0.2rem 0;">🎓 ${u.college || 'College Not Set'}</p>
+                <p style="color: #aaa; font-size: 0.8rem; margin: 0.2rem 0; word-break: break-all;">✉️ ${u.email || 'N/A'}</p>
+                <p style="color: #aaa; font-size: 0.8rem; margin: 0.2rem 0;">📞 ${u.phone || 'N/A'}</p>
+              </div>
+
+              <div style="margin-top: 0.8rem; padding-top: 0.4rem; border-top: 1px solid #222; font-size: 0.65rem; color: #555;">
+                UID: ${uid.substring(0, 10)}...
+              </div>
+            </div>
+          `);
         });
 
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement("a");
-        link.setAttribute("href", encodedUri);
-        link.setAttribute("download", `trichconnect_applications_${new Date().toISOString().slice(0,10)}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      } catch (err) {
-        alert("Export failed: " + err.message);
+      } catch (error) {
+        console.error("Error loading users:", error);
+        grid.innerHTML = `<p style="color: #ff4d4d; font-family: 'Space Grotesk', sans-serif;">Failed to load users: ${error.message}</p>`;
       }
-    });
+    }
 
-    // LOAD ALL APPLICATIONS FOR ADMIN REVIEW
+    // Attach event listener to refresh button
+    document.getElementById("refresh-users-btn")?.addEventListener("click", loadAllUsers);
+
+    // 2. LOAD ALL APPLICATIONS
     async function loadAllApplications() {
       const container = document.getElementById("applications-list");
       try {
@@ -315,13 +272,15 @@ loadAllUsers();
       }
     }
 
-    // STRICT GATEKEEPER CHECK
+    // 3. GATEKEEPER CHECK (AUTHENTICATION & INITIALIZATION)
     onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
           const userDocSnap = await getDoc(doc(db, "users", user.uid));
           if (userDocSnap.exists() && userDocSnap.data().role === "admin") {
+            // Authorized Admin -> Load All Data
             loadAllApplications();
+            loadAllUsers();
           } else {
             alert("⛔ ACCESS DENIED: Clearance level 'ADMIN' required!");
             window.location.href = "index.html";
@@ -335,7 +294,45 @@ loadAllUsers();
       }
     });
 
-    // POST NEW MANUAL MISSION
+    // 4. EXPORT APPLICATIONS TO CSV
+    document.getElementById("export-csv-btn").addEventListener("click", async () => {
+      try {
+        const snap = await getDocs(collection(db, "applications"));
+        if (snap.empty) {
+          alert("No application records found to export.");
+          return;
+        }
+
+        let csvContent = "data:text/csv;charset=utf-8,Applicant Name,Email,Phone,College,Company,Role,Status,Applied At\n";
+
+        snap.forEach(docSnap => {
+          const data = docSnap.data();
+          const row = [
+            `"${data.applicantName || ""}"`,
+            `"${data.applicantEmail || ""}"`,
+            `"${data.applicantPhone || ""}"`,
+            `"${data.applicantCollege || ""}"`,
+            `"${data.company || ""}"`,
+            `"${data.role || ""}"`,
+            `"${data.status || ""}"`,
+            `"${data.appliedAt || ""}"`
+          ].join(",");
+          csvContent += row + "\n";
+        });
+
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `trichconnect_applications_${new Date().toISOString().slice(0,10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch (err) {
+        alert("Export failed: " + err.message);
+      }
+    });
+
+    // 5. POST NEW MANUAL MISSION
     document.getElementById("create-mission-form").addEventListener("submit", async (e) => {
       e.preventDefault();
       
@@ -360,62 +357,61 @@ loadAllUsers();
       }
     });
 
-    // IMPORT LIVE INTERNSHIPS FROM ADZUNA (TRICHY TARGETED)
-    // IMPORT LIVE INTERNSHIPS FROM ADZUNA (CLEANED FORMATTING)
+    // 6. IMPORT LIVE INTERNSHIPS FROM ADZUNA
+    document.getElementById("import-adzuna-btn")?.addEventListener("click", async () => {
+      const statusEl = document.getElementById("import-status");
+      const btn = document.getElementById("import-adzuna-btn");
 
-document.getElementById("import-adzuna-btn")?.addEventListener("click", async () => {
-  const statusEl = document.getElementById("import-status");
-  const btn = document.getElementById("import-adzuna-btn");
+      statusEl.style.color = "#00f2fe";
+      statusEl.innerText = "⏳ Scanning Adzuna for Trichy opportunities...";
+      btn.disabled = true;
 
-  statusEl.style.color = "#00f2fe";
-  statusEl.innerText = "⏳ Scanning Adzuna for Trichy opportunities...";
-  btn.disabled = true;
+      const apiUrl = `https://api.adzuna.com/v1/api/jobs/in/search/1?app_id=${ADZUNA_APP_ID}&app_key=${ADZUNA_APP_KEY}&results_per_page=10&what=internship&where=Trichy`;
 
-  const apiUrl = `https://api.adzuna.com/v1/api/jobs/in/search/1?app_id=${ADZUNA_APP_ID}&app_key=${ADZUNA_APP_KEY}&results_per_page=10&what=internship&where=Trichy`;
+      try {
+        const response = await fetch(apiUrl);
+        const data = await response.json();
 
-  try {
-    const response = await fetch(apiUrl);
-    const data = await response.json();
+        if (!data.results || data.results.length === 0) {
+          statusEl.style.color = "#ff4b4b";
+          statusEl.innerText = "⚠️ No direct Trichy listings found today on Adzuna. Try searching broader areas or remote roles!";
+          btn.disabled = false;
+          return;
+        }
 
-    if (!data.results || data.results.length === 0) {
-      statusEl.style.color = "#ff4b4b";
-      statusEl.innerText = "⚠️ No direct Trichy listings found today on Adzuna. Try searching broader areas or remote roles!";
-      btn.disabled = false;
-      return;
-    }
+        let addedCount = 0;
+        for (const job of data.results) {
+          let stipendText = "Disclosed Upon Selection";
+          if (job.salary_min) {
+            stipendText = `₹${Math.round(job.salary_min / 12)} / month`;
+          }
 
-    let addedCount = 0;
-    for (const job of data.results) {
-      // Clean up stipend formatting (No double ₹ or repeated '/ month')
-      let stipendText = "Disclosed Upon Selection";
-      if (job.salary_min) {
-        stipendText = `₹${Math.round(job.salary_min / 12)} / month`;
+          await addDoc(collection(db, "internships"), {
+            company: job.company?.display_name || "Verified Partner",
+            role: job.title.replace(/<\/?[^>]+(>|$)/g, ""),
+            stipend: stipendText,
+            description: job.description ? job.description.substring(0, 160) + "..." : "No detailed objective provided.",
+            applyUrl: job.redirect_url || "",
+            createdAt: new Date().toISOString()
+          });
+          addedCount++;
+        }
+
+        statusEl.style.color = "#34d399";
+        statusEl.innerText = `✅ SUCCESS! Added ${addedCount} clean missions directly to Firestore!`;
+      } catch (err) {
+        console.error("Adzuna API Fetch Error:", err);
+        statusEl.style.color = "#ff4b4b";
+        statusEl.innerText = "❌ FETCH ERROR: " + err.message;
+      } finally {
+        btn.disabled = false;
       }
+    });
 
-      await addDoc(collection(db, "internships"), {
-        company: job.company?.display_name || "Verified Partner",
-        role: job.title.replace(/<\/?[^>]+(>|$)/g, ""), // Strip HTML tags
-        stipend: stipendText,
-        description: job.description ? job.description.substring(0, 160) + "..." : "No detailed objective provided.",
-        applyUrl: job.redirect_url || "",
-        createdAt: new Date().toISOString()
-      });
-      addedCount++;
-    }
-
-    statusEl.style.color = "#34d399";
-    statusEl.innerText = `✅ SUCCESS! Added ${addedCount} clean missions directly to Firestore!`;
-  } catch (err) {
-    console.error("Adzuna API Fetch Error:", err);
-    statusEl.style.color = "#ff4b4b";
-    statusEl.innerText = "❌ FETCH ERROR: " + err.message;
-  } finally {
-    btn.disabled = false;
-  }
-});
-
-    // LOGOUT
-    document.getElementById("logout-btn").addEventListener("click", () => signOut(auth).then(() => window.location.href = "login.html"));
+    // 7. LOGOUT HANDLER
+    document.getElementById("logout-btn").addEventListener("click", () => {
+      signOut(auth).then(() => window.location.href = "login.html");
+    });
   </script>
 
 </body>
