@@ -1,0 +1,6 @@
+node_modules/
+.wwebjs_auth/
+.wwebjs_cache/
+trichconnect-wa-bot/node_modules/
+trichconnect-wa-bot/.wwebjs_auth/
+trichconnect-wa-bot/.wwebjs_cache/
