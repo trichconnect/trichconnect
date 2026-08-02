@@ -28,7 +28,21 @@
   gtag('config', 'G-42QNGWBPYJ');
 </script>
 
+<!-- Registered Users Section -->
+<section style="margin-top: 3rem; background: #000; border: 2px solid #00f2fe; padding: 1.5rem; border-radius: 8px;">
+  <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+    <h2 style="color: #00f2fe; font-family: 'Space Grotesk', sans-serif; margin: 0;">
+      👥 REGISTERED HEROES (<span id="total-users-count">0</span>)
+    </h2>
+    <button id="refresh-users-btn" onclick="loadAllUsers()" style="background: #00f2fe; color: #000; border: none; padding: 0.5rem 1rem; font-weight: bold; cursor: pointer; border-radius: 4px;">
+      🔄 REFRESH USERS
+    </button>
+  </div>
 
+  <div id="users-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 1rem;">
+    <p style="color: #666;">Loading users...</p>
+  </div>
+</section>
 
 </head>
 <body class="admin-page">
@@ -120,6 +134,67 @@
 
   <!-- FIREBASE & APPLICATION LOGIC -->
   <script type="module">
+
+
+import { getFirestore, collection, getDocs } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+
+// Call this function when the admin page loads (or after verifying admin auth)
+async function loadAllUsers() {
+  const grid = document.getElementById("users-grid");
+  const countSpan = document.getElementById("total-users-count");
+
+  try {
+    const usersSnap = await getDocs(collection(db, "users"));
+    
+    if (usersSnap.empty) {
+      grid.innerHTML = `<p style="color: #aaa;">No users registered yet.</p>`;
+      countSpan.textContent = "0";
+      return;
+    }
+
+    countSpan.textContent = usersSnap.size;
+    grid.innerHTML = "";
+
+    usersSnap.forEach((docSnap) => {
+      const u = docSnap.data();
+      const uid = docSnap.id;
+
+      grid.insertAdjacentHTML("beforeend", `
+        <div style="background: #111; border: 1px solid #333; padding: 1rem; border-radius: 6px; display: flex; flex-direction: column; justify-content: space-between;">
+          <div>
+            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 0.5rem;">
+              <h4 style="color: #FFF; margin: 0; font-size: 1.1rem;">${u.fullName || 'Anonymous Hero'}</h4>
+              <span style="background: #222; color: #FFD700; font-size: 0.75rem; padding: 2px 6px; border-radius: 3px; font-weight: bold; text-transform: uppercase;">
+                ${u.role || 'student'}
+              </span>
+            </div>
+            
+            <p style="color: #00f2fe; font-size: 0.85rem; margin: 0.2rem 0;">🎓 ${u.college || 'College Not Set'}</p>
+            <p style="color: #aaa; font-size: 0.85rem; margin: 0.2rem 0;">✉️ ${u.email || 'N/A'}</p>
+            <p style="color: #aaa; font-size: 0.85rem; margin: 0.2rem 0;">📞 ${u.phone || 'N/A'}</p>
+          </div>
+
+          <div style="margin-top: 1rem; padding-top: 0.5rem; border-top: 1px solid #222; font-size: 0.7rem; color: #555;">
+            UID: ${uid.substring(0, 10)}...
+          </div>
+        </div>
+      `);
+    });
+
+  } catch (error) {
+    console.error("Error loading users:", error);
+    grid.innerHTML = `<p style="color: #ff4d4d;">Failed to load users: ${error.message}</p>`;
+  }
+}
+
+// Make function accessible globally for the Refresh button
+window.loadAllUsers = loadAllUsers;
+
+// Trigger load on start
+loadAllUsers();
+
+
+
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
     import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
     import { getFirestore, doc, getDoc, collection, getDocs, addDoc, updateDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
