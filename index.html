@@ -1,9 +1,11 @@
+<!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TRICHCONNECT</title>
+  <title>TRICHCONNECT // STUDENT TERMINAL</title>
 
-  <!-- GOOGLE FONTS (Fixes Sluggish Typography) -->
+  <!-- GOOGLE FONTS -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
@@ -59,19 +61,25 @@
 
       <!-- Right Feed -->
       <section>
-        <div class="section-title">
-          <span>LOCAL MISSIONS & OPPORTUNITIES</span>
-          <span style="font-size: 1rem; color: #888;">TRICHY SECTOR</span>
+        <div class="feed-header">
+          <div>
+            <span class="comic-tag dark">SECTOR: TRICHY</span>
+            <h3 class="section-title">ACTIVE MISSIONS & OPPORTUNITIES</h3>
+          </div>
+          <span class="live-indicator">● LIVE FEED</span>
         </div>
         
-        <div id="opportunities-feed">
+        <div id="opportunities-feed" class="job-feed-grid">
           <div style="background: #111; border: 2px solid #FFF; padding: 2rem; text-align: center; font-family: 'Space Grotesk', sans-serif;">
             SCANNING DATABASE FOR MISSIONS...
           </div>
         </div>
 
-        <div class="section-title" style="margin-top: 3.5rem;">
-          <span>SUBMITTED APPLICATIONS LOG</span>
+        <div class="feed-header" style="margin-top: 3.5rem;">
+          <div>
+            <span class="comic-tag dark">TRACKING</span>
+            <h3 class="section-title">SUBMITTED APPLICATIONS LOG</h3>
+          </div>
         </div>
         
         <div id="applications-feed">
@@ -155,15 +163,30 @@
           const listingId = docSnap.id;
           
           feed.insertAdjacentHTML("beforeend", `
-            <article class="feed-card" style="background: #111; border: 2px solid #FFF; padding: 1.5rem; margin-bottom: 1.5rem; box-shadow: 4px 4px 0px #FFF;">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <span class="comic-tag">[${(item.company || "UNKNOWN").toUpperCase()}]</span>
-                <span style="font-family: 'Bebas Neue', sans-serif; font-size: 1.3rem; color: #FFF; background: #000; border: 1px solid #FFF; padding: 0.2rem 0.6rem;">STIPEND: ${item.stipend || "N/A"}</span>
+            <div class="mission-card">
+              <div class="mission-card-header">
+                <div class="company-badge">
+                  <span class="company-name">${(item.company || "UNKNOWN").toUpperCase()}</span>
+                  <span class="mission-type">MISSION</span>
+                </div>
+                <div class="stipend-badge">
+                  <span class="stipend-amount">₹${item.stipend || "N/A"}</span>
+                  <span class="stipend-sub">/ month</span>
+                </div>
               </div>
-              <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 2.2rem; color: #FFF; margin-bottom: 0.5rem; letter-spacing: 0.05em;">${item.role}</h3>
-              <p style="color: #AAA; font-size: 0.95rem; line-height: 1.6; margin-bottom: 1.5rem;">${item.description}</p>
-              <button class="action-btn apply-btn" data-id="${listingId}" data-company="${item.company}" data-role="${item.role}">APPLY FOR MISSION →</button>
-            </article>
+
+              <div class="mission-body">
+                <h4 class="mission-title">${item.role}</h4>
+                <p class="mission-location">📍 Trichy Sector</p>
+                <p class="mission-desc">${item.description || "No mission protocol details provided."}</p>
+              </div>
+
+              <div class="mission-footer">
+                <button class="action-btn apply-btn" data-id="${listingId}" data-company="${item.company}" data-role="${item.role}">
+                  APPLY FOR MISSION →
+                </button>
+              </div>
+            </div>
           `);
         });
 
@@ -222,7 +245,7 @@
           appFeed.insertAdjacentHTML("beforeend", `
             <div style="background: #111; border: 2px solid #FFF; padding: 1.25rem; margin-bottom: 1rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 4px 4px 0px #FFF;">
               <div>
-                <div style="font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: #FFF;">${appData.role}</div>
+                <div style="font-family: 'Bebas Neue', sans-serif; font-size: 1.6rem; color: #FFF; letter-spacing: 0.05em;">${appData.role}</div>
                 <div style="font-family: 'Space Grotesk', sans-serif; font-size: 0.85rem; color: #888;">TARGET: ${appData.company.toUpperCase()}</div>
               </div>
               <span class="comic-tag dark">STATUS: ${appData.status}</span>
@@ -237,16 +260,16 @@
     document.getElementById("logout-btn").addEventListener("click", () => signOut(auth).then(() => window.location.href = "login.html"));
   </script>
 
-
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/sw.js')
-        .then(reg => console.log('Service Worker Registered'))
-        .catch(err => console.log('SW Registration Failed: ', err));
-    });
-  }
-</script>
+  <!-- SERVICE WORKER REGISTRATION -->
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+          .then(reg => console.log('Service Worker Registered'))
+          .catch(err => console.log('SW Registration Failed: ', err));
+      });
+    }
+  </script>
 
 </body>
 </html>
