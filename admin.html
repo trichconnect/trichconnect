@@ -87,11 +87,11 @@
         <!-- Adzuna API Fetch Section -->
         <div>
           <span class="comic-tag" style="background: #00f2fe; color: #000;">[AUTOMATED SENSOR]</span>
-          <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: #00f2fe; margin: 0.5rem 0;">FETCH TRICHY INTERNSHIPS</h3>
-          <p style="font-size: 0.8rem; color: #888; font-family: 'Space Grotesk', sans-serif; margin-bottom: 1rem;">Pull live internship listings targeting Trichy via Adzuna API and broadcast them to your feed.</p>
+          <h3 style="font-family: 'Bebas Neue', sans-serif; font-size: 1.8rem; color: #00f2fe; margin: 0.5rem 0;">FETCH REGIONAL INTERNSHIPS</h3>
+          <p style="font-size: 0.8rem; color: #888; font-family: 'Space Grotesk', sans-serif; margin-bottom: 1rem;">Pull live internship listings targeting Tamil Nadu via Adzuna API and broadcast them to your feed.</p>
           
           <button id="import-adzuna-btn" class="action-btn" style="width: 100%; padding: 0.8rem; background: #00f2fe; color: #000; font-family: 'Bebas Neue', sans-serif; font-size: 1.1rem; border: none; cursor: pointer; font-weight: bold;">
-            ⚡ FETCH TRICHY MISSIONS
+            ⚡ FETCH REGIONAL MISSIONS
           </button>
           <p id="import-status" style="margin-top: 0.75rem; font-size: 0.85rem; font-family: 'Space Grotesk', sans-serif; color: #888;"></p>
         </div>
@@ -357,16 +357,17 @@
       }
     });
 
-    // 6. IMPORT LIVE INTERNSHIPS FROM ADZUNA
+    // 6. IMPORT LIVE INTERNSHIPS FROM ADZUNA (WIDENED TO TAMIL NADU TO ENSURE HITS)
     document.getElementById("import-adzuna-btn")?.addEventListener("click", async () => {
       const statusEl = document.getElementById("import-status");
       const btn = document.getElementById("import-adzuna-btn");
 
       statusEl.style.color = "#00f2fe";
-      statusEl.innerText = "⏳ Scanning Adzuna for Trichy opportunities...";
+      statusEl.innerText = "⏳ Scanning Adzuna for Tamil Nadu opportunities...";
       btn.disabled = true;
 
-      const apiUrl = `https://api.adzuna.com/v1/api/jobs/in/search/1?app_id=${ADZUNA_APP_ID}&app_key=${ADZUNA_APP_KEY}&results_per_page=10&what=internship&where=Trichy`;
+      // Changed location filter from Trichy to Tamil Nadu for broader coverage
+      const apiUrl = `https://api.adzuna.com/v1/api/jobs/in/search/1?app_id=${ADZUNA_APP_ID}&app_key=${ADZUNA_APP_KEY}&results_per_page=10&what=internship&where=Tamil+Nadu`;
 
       try {
         const response = await fetch(apiUrl);
@@ -374,7 +375,7 @@
 
         if (!data.results || data.results.length === 0) {
           statusEl.style.color = "#ff4b4b";
-          statusEl.innerText = "⚠️ No direct Trichy listings found today on Adzuna. Try searching broader areas or remote roles!";
+          statusEl.innerText = "⚠️ No regional listings found today on Adzuna. Try adjusting your search query parameters!";
           btn.disabled = false;
           return;
         }
